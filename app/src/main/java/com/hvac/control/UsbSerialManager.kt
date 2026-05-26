@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbManager
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
@@ -40,13 +41,14 @@ object UsbSerialManager {
                     PendingIntent.FLAG_IMMUTABLE
                 )
                 manager.requestPermission(device, permissionIntent)
-                onResult(false) // Will need to retry after permission granted
+                onResult(false)
                 return@execute
             }
 
-            val connection = manager.openDevice(device) ?: run {
+            val connection: UsbDeviceConnection? = manager.openDevice(device)
+            if (connection == null) {
                 onResult(false)
-                return@run
+                return@execute
             }
 
             val port = driver.ports[0]
